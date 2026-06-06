@@ -1,0 +1,110 @@
+@import 'tailwindcss';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --roast: #FF4500;
+  --roast-dim: rgba(255, 69, 0, 0.12);
+  --roast-border: rgba(255, 69, 0, 0.3);
+  --bg-base: #080808;
+  --bg-surface: #0f0f0f;
+  --bg-elevated: #141414;
+  --bg-hover: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.14);
+  --text-primary: #f0f0f0;
+  --text-secondary: #888;
+  --text-muted: #444;
+  --text-ghost: #2a2a2a;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --radius: 6px;
+  --radius-sm: 4px;
+  
+  /* shadcn tokens for compatibility */
+  --background: #080808;
+  --foreground: #f0f0f0;
+  --card: #0f0f0f;
+  --card-foreground: #f0f0f0;
+  --popover: #0f0f0f;
+  --popover-foreground: #f0f0f0;
+  --primary: #FF4500;
+  --primary-foreground: #f0f0f0;
+  --secondary: #141414;
+  --secondary-foreground: #f0f0f0;
+  --muted: #444;
+  --muted-foreground: #888;
+  --accent: #FF4500;
+  --accent-foreground: #f0f0f0;
+  --destructive: #FF4500;
+  --input: #141414;
+  --ring: #FF4500;
+}
+
+@theme inline {
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--roast);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+}
+
+@layer base {
+  * {
+    @apply border-[var(--border)] outline-[var(--roast)]/50;
+  }
+  html {
+    @apply font-[var(--font-display)];
+  }
+}
