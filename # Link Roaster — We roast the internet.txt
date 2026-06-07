@@ -1,0 +1,13 @@
+# Link Roaster — We roast the internet
+
+[Feed](http://localhost:3000)
+[Top Roasts](http://localhost:3000)
+[About](http://localhost:3000)
+
+# Every linkdeserves a roast.
+Paste any URL — startup, article, portfolio, or cringe — and our AI delivers a savage summary, brutal roast, and a one-line verdict. Built for the internet, by the internet.
+No roasts yet.
+Be the first to submit a link.
+[GitHub](http://localhost:3000)
+[About](http://localhost:3000)
+[API](http://localhost:3000)

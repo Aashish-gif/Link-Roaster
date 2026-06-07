@@ -1,16 +1,49 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { RoastCard } from '@/components/RoastCard'
-import { mockRoasts } from '@/lib/mock-data'
+import { getRoastById } from '@/lib/api'
+import { Roast } from '@/lib/types'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { notFound } from 'next/navigation'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 export default function RoastPage() {
   const params = useParams()
   const id = params.id as string
 
-  const roast = mockRoasts.find((r) => r.id === id)
+  const [roast, setRoast] = useState<Roast | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchRoast = async () => {
+      setIsLoading(true)
+      try {
+        const data = await getRoastById(id)
+        setRoast(data)
+      } catch (err) {
+        console.error('Error fetching roast:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchRoast()
+  }, [id])
+
+  if (isLoading) {
+    return (
+      <main
+        className="min-h-screen flex flex-col items-center justify-center px-6"
+        style={{ backgroundColor: 'var(--bg-base)' }}
+      >
+        <LoadingSpinner />
+        <p className="text-xs font-mono mt-4 animate-pulse" style={{ color: 'var(--text-muted)' }}>
+          Retrieving from the vault...
+        </p>
+      </main>
+    )
+  }
 
   if (!roast) {
     return (
@@ -151,22 +184,7 @@ export default function RoastPage() {
           >
             ( ( ) ) ( )
           </span>
-          <div className="flex gap-4">
-            {['GitHub', 'About', 'API'].map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-[12px] transition-colors"
-                style={{
-                  color: 'var(--text-muted)',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-              >
-                {link}
-              </a>
-            ))}
-          </div>
+
         </div>
       </footer>
     </main>

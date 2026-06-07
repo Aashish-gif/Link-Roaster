@@ -1,19 +1,38 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { URLInputForm } from '@/components/URLInputForm'
 import { RoastCard } from '@/components/RoastCard'
 import { FeedList } from '@/components/FeedList'
-import { generateMockRoast, mockRoasts } from '@/lib/mock-data'
+import { getAllRoasts, submitUrl } from '@/lib/api'
 import { Roast } from '@/lib/types'
 
 export default function HomePage() {
   const [currentRoast, setCurrentRoast] = useState<Roast | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [displayedFeed, setDisplayedFeed] = useState(mockRoasts.slice(0, 6))
+  const [displayedFeed, setDisplayedFeed] = useState<Roast[]>([])
+  const [totalRoasted, setTotalRoasted] = useState<number>(0)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+
   const resultRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Fetch initial roasts feed on mount
+  useEffect(() => {
+    const fetchInitialFeed = async () => {
+      try {
+        const result = await getAllRoasts(1, 6)
+        setDisplayedFeed(result.data)
+        setTotalRoasted(result.pagination.total)
+        setHasMore(result.pagination.hasMore)
+      } catch (err) {
+        console.error('Failed to load feed:', err)
+      }
+    }
+    fetchInitialFeed()
+  }, [])
 
   const handleRoastSubmit = async (url: string) => {
     setIsLoading(true)
@@ -21,14 +40,21 @@ export default function HomePage() {
     setCurrentRoast(null)
 
     try {
-      const roast = await generateMockRoast(url)
+      const roast = await submitUrl(url)
       setCurrentRoast(roast)
+
+      // Refresh the feed to show the newly added roast
+      const result = await getAllRoasts(1, 6)
+      setDisplayedFeed(result.data)
+      setTotalRoasted(result.pagination.total)
+      setPage(1)
+      setHasMore(result.pagination.hasMore)
 
       setTimeout(() => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }, 100)
-    } catch (err) {
-      setError('Something went wrong. Try again with a different URL.')
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Try again with a different URL.')
     } finally {
       setIsLoading(false)
     }
@@ -41,13 +67,17 @@ export default function HomePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleLoadMore = () => {
-    setDisplayedFeed((prev) => [
-      ...prev,
-      ...mockRoasts
-        .filter((r) => !prev.some((p) => p.id === r.id))
-        .slice(0, 3),
-    ])
+  const handleLoadMore = async () => {
+    try {
+      const nextPage = page + 1
+      const result = await getAllRoasts(nextPage, 6)
+      setDisplayedFeed((prev) => [...prev, ...result.data])
+      setPage(nextPage)
+      setHasMore(result.pagination.hasMore)
+      setTotalRoasted(result.pagination.total)
+    } catch (err) {
+      console.error('Failed to load more roasts:', err)
+    }
   }
 
   const scrollToInput = () => {
@@ -81,23 +111,7 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Center: Nav Links (hidden on mobile) */}
-        <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
-          {['Feed', 'Top Roasts', 'About'].map((link) => (
-            <a
-              key={link}
-              href="#"
-              className="text-xs transition-colors"
-              style={{
-                color: 'var(--text-muted)',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-            >
-              {link}
-            </a>
-          ))}
-        </div>
+
 
         {/* Right: Counter & Button */}
         <div className="ml-auto flex items-center gap-3">
@@ -118,7 +132,7 @@ export default function HomePage() {
                 animation: 'flicker 1.4s ease-in-out infinite',
               }}
             />
-            🔥 {mockRoasts.length} roasted
+            🔥 {totalRoasted} roasted
           </div>
           <button
             onClick={scrollToInput}
@@ -197,7 +211,7 @@ export default function HomePage() {
         {/* Proof Strip */}
         <div className="flex items-center gap-6 flex-wrap">
           {[
-            { value: mockRoasts.length, label: 'links roasted' },
+            { value: totalRoasted, label: 'links roasted' },
             { value: '~5s', label: 'to burn' },
             { value: '0', label: 'links spared' },
           ].map((stat, i) => (
@@ -244,7 +258,7 @@ export default function HomePage() {
       >
         <FeedList
           roasts={displayedFeed}
-          hasMore={displayedFeed.length < mockRoasts.length}
+          hasMore={hasMore}
           onLoadMore={handleLoadMore}
         />
       </section>
@@ -269,22 +283,7 @@ export default function HomePage() {
           >
             ( ( ) ) ( )
           </span>
-          <div className="flex gap-4">
-            {['GitHub', 'About', 'API'].map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-[12px] transition-colors"
-                style={{
-                  color: 'var(--text-muted)',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-              >
-                {link}
-              </a>
-            ))}
-          </div>
+
         </div>
       </footer>
     </main>

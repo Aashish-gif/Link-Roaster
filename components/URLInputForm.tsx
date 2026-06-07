@@ -1,7 +1,7 @@
 'use client'
 
 import { URLInputFormProps } from '@/lib/types'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LoadingSpinner } from './LoadingSpinner'
 import { Link2, AlertCircle } from 'lucide-react'
 
@@ -17,6 +17,10 @@ export function URLInputForm({
 }: URLInputFormPropsWithRef) {
   const [url, setUrl] = useState('')
   const [localError, setLocalError] = useState<string | null>(error)
+
+  useEffect(() => {
+    setLocalError(error)
+  }, [error])
   const internalRef = useRef<HTMLInputElement>(null)
   const inputRef = externalRef || internalRef
   const [isTyping, setIsTyping] = useState(false)
@@ -118,7 +122,7 @@ export function URLInputForm({
             </div>
 
             {/* Bottom Bar */}
-            {!localError && !error ? (
+            {!localError ? (
               <div
                 className="px-0 py-2 flex items-center justify-between text-[10px] font-mono"
                 id="input-hint"
@@ -133,7 +137,7 @@ export function URLInputForm({
       </div>
 
       {/* Error State */}
-      {(localError || error) && (
+      {localError && (
         <div
           className="mt-3 rounded-[var(--radius-sm)] px-4 py-3 border flex items-start gap-2"
           style={{
@@ -146,7 +150,7 @@ export function URLInputForm({
             className="text-xs font-mono"
             style={{ color: '#e85252' }}
           >
-            {localError || error}
+            {localError}
           </p>
         </div>
       )}
