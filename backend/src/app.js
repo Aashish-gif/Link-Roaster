@@ -14,7 +14,11 @@ app.use(helmet());
 // 2. Setup CORS options
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL, /\.vercel\.app$/].filter(Boolean)
+    ? [
+        process.env.FRONTEND_URL,
+        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+        /\.vercel\.app$/
+      ].filter(Boolean)
     : '*', // Allow all origins in development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
