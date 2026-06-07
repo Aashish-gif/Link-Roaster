@@ -1,0 +1,176 @@
+{
+  "info": {
+    "name": "Link Roaster API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for Link Roaster backend. Includes Create Roast, List Roasts, Get Roast By ID, and Health Check endpoints. All requests have automated test scripts that validate status codes, response schema and required fields."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response has status ok', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json.status).to.eql('ok');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Roast",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/roast",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "roast"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"https://example.com\"\n}"
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201 or 200 (cached)', function () {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              "pm.test('Response has required fields', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('data');",
+              "  var data = json.data;",
+              "  pm.expect(data).to.have.property('url');",
+              "  pm.expect(data).to.have.property('roast');",
+              "  pm.expect(data).to.have.property('summary');",
+              "  pm.expect(data).to.have.property('verdict');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Roasts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/roasts?page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "roasts"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response includes data array and pagination', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('data').that.is.an('array');",
+              "  pm.expect(json).to.have.property('pagination');",
+              "  var p = json.pagination;",
+              "  ['page','limit','total','totalPages','hasMore'].forEach(function(k){ pm.expect(p).to.have.property(k); });",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Roast By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/roasts/{{roastId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "roasts", "{{roastId}}"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Ensure roastId variable is set; if not, pick first ID from List Roasts",
+              "if (!pm.variables.get('roastId')) {",
+              "  pm.sendRequest({",
+              "    url: pm.environment.get('baseUrl') + '/api/roasts?page=1&limit=1',",
+              "    method: 'GET'",
+              "  }, function (err, res) {",
+              "    if (!err) {",
+              "      var data = res.json().data[0];",
+              "      if (data && data._id) { pm.variables.set('roastId', data._id); }",
+              "    }",
+              "  });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response has roast data', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('data');",
+              "  var data = json.data;",
+              "  ['url','roast','summary','verdict','_id'].forEach(function(k){ pm.expect(data).to.have.property(k); });",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}

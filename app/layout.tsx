@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Link Roaster — We roast the internet',
   description: 'Paste any URL. Get a brutal AI-powered summary and roast. Zero mercy.',
-  generator: 'v0.app',
+
   icons: {
     icon: [
       {
