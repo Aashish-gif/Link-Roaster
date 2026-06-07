@@ -90,21 +90,3 @@ When a request fails, the API returns a corresponding HTTP status and JSON respo
 | `INVALID_ID` | 400 | The provided Roast ID is not a valid 24-character MongoDB ObjectId. |
 
 ---
-
-## Deployment to Render.com
-
-1. Create a free account on [Render](https://render.com).
-2. Connect your GitHub repository containing the project.
-3. Create a new **Web Service**.
-4. Configure the service settings:
-   - **Root Directory:** `backend`
-   - **Runtime:** `Node`
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-5. Go to the **Environment** tab and add the following keys from your `.env` file:
-   - `PORT`
-   - `MONGODB_URI`
-   - `GEMINI_API_KEY`
-   - `FRONTEND_URL`
-   - `NODE_ENV` (set to `production`)
-6. **Note:** Render's free tier instances spin down after 15 minutes of inactivity. The first request after a spin-down may take a minute or two to respond.
